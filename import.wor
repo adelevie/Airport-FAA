@@ -1,0 +1,65 @@
+!Workspace
+!Version 300
+!Charset WindowsLatin1
+' This script was writen by Michael R. Davis. If you have any
+' edits or suggestions please E-mail them to <mdavis@fcc.gov>.
+'
+' This MapBasic Workspace script loads the 
+' Airport databases from the FAA.
+' These databases can be found on the Internet at 
+'    http://www.faa.gov/arp/pubcsv.zip
+'    http://www.faa.gov/arp/pricsv.zip
+' In order to import these databases download and unzip 
+' the above two files.  Save the two .csv files in the 
+' same directory as this Workspace program.  
+' Then open this Workspace program with MapInfo. 
+
+Print "Registering tables..."
+
+Register Table ApplicationDirectory$() + "priarpts.csv"  TYPE ASCII Delimiter 44 Titles Charset "WindowsLatin1" Into ApplicationDirectory$() + "priarpts.tab"
+Open Table ApplicationDirectory$() + "priarpts.tab" Interactive
+
+Register Table ApplicationDirectory$() + "pubarpts.csv"  TYPE ASCII Delimiter 44 Titles Charset "WindowsLatin1" Into ApplicationDirectory$() + "pubarpts.tab"
+Open Table ApplicationDirectory$() + "pubarpts.tab" Interactive
+
+Print "Saving tables..."
+
+Commit Table priarpts As ApplicationDirectory$() + "priarpt1.tab" TYPE NATIVE Charset "WindowsLatin1"
+Commit Table pubarpts As ApplicationDirectory$() + "pubarpt1.tab" TYPE NATIVE Charset "WindowsLatin1"
+
+Close Table priarpts Interactive
+Close Table pubarpts Interactive
+
+Open Table ApplicationDirectory$() + "pubarpt1.TAB"
+Open Table ApplicationDirectory$() + "priarpt1.TAB"
+
+Print "Altering tables..."
+
+Alter Table "pubarpt1" ( add Lat Float, Lon Float )
+Alter Table "priarpt1" ( add Lat Float, Lon Float )
+Update priarpt1 Set Lat = Val(Left$(LATITUDE,2)) + (Val(Mid$(LATITUDE,4,2)) + Val(Mid$(LATITUDE,7,len(LATITUDE) - 7))/60)/60, Lon = -(Val(Left$(LONGITUDE,3)) + (Val(Mid$(LONGITUDE,5,2)) + Val(Mid$(LONGITUDE,8,len(LONGITUDE) - 8))/60)/60)
+Update pubarpt1 Set Lat = Val(Left$(LATITUDE,2)) + (Val(Mid$(LATITUDE,4,2)) + Val(Mid$(LATITUDE,7,len(LATITUDE) - 7))/60)/60, Lon = -(Val(Left$(LONGITUDE,3)) + (Val(Mid$(LONGITUDE,5,2)) + Val(Mid$(LONGITUDE,8,len(LONGITUDE) - 8))/60)/60)
+Select * from priarpt1 where Right$(LATITUDE,1) = "S" into South
+Update South Set Lat = -Lat
+Select * from priarpt1 where Right$(LONGITUDE,1) = "E" into East
+Update East Set Lon = -Lon
+Select * from pubarpt1 where Right$(LATITUDE,1) = "S" into South
+Update South Set Lat = -Lat
+Select * from pubarpt1 where Right$(LONGITUDE,1) = "E" into East
+Update East Set Lon = -Lon
+
+Print "Geocoding the Airports..."
+
+Create Map For pubarpt1 CoordSys Earth Projection 1, 62
+Create Map For priarpt1 CoordSys Earth Projection 1, 62
+Set Style Symbol MakeSymbol (52,0,12)
+Update pubarpt1 Set Obj=Createpoint(Lon,Lat)
+Set Style Symbol MakeSymbol (52,0,10)
+Update priarpt1 Set Obj=Createpoint(Lon,Lat)
+Commit Table priarpt1
+Commit Table pubarpt1
+Close All
+
+Print "Loading Workspace..."
+
+Run Application ApplicationDirectory$() + "arptfaa.wor"

@@ -1,0 +1,35 @@
+!Workspace
+!Version 300
+!Charset WindowsLatin1
+Open Table "pubarpt1" As pubarpt1
+Open Table "priarpt1" As priarpt1
+Open Table "D:\Data\census\States\States" As States Interactive
+Map From priarpt1,pubarpt1,States 
+  Position (0.0625,0.09375) Units "in"
+  Width 5.14583 Units "in" Height 3.46875 Units "in" 
+Set Window FrontWindow() ScrollBars Off Autoscroll On
+Set Map
+  CoordSys Earth Projection 1, 62
+  Center (-77.02529543,38.97076588)
+  Zoom 106.1818164 Units "mi"
+  Preserve Zoom Display Zoom
+  XY Units "degree" Distance Units "mi" Area Units "sq mi"
+Set Map
+  Layer 1
+    Display Global
+    Global   Symbol (52,0,10)   
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With AIRPORT_NAME
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 2
+    Display Global
+    Global   Symbol (52,128,12)   
+    Label Line Arrow Position Right Font ("Arial",0,9,0) Pen (1,2,0) 
+      With AIRPORT_NAME
+      Parallel On Auto Off Overlap Off Duplicates On Offset 2
+      Visibility On
+  Layer 3
+    Display Global
+    Global  Brush (2,16777104,16777215)    
+    Selectable Off
